@@ -353,4 +353,4 @@ app.delete("/users/:userId/transactions/:id", (request: Request, response: Respo
 
 
 
-app.listen(process.env.POT ||8080);
+app.listen(process.env.PORT ||8080);
