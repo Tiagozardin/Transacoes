@@ -34,6 +34,9 @@ var Transaction = /** @class */ (function () {
     }
     return Transaction;
 }());
+app.get("/", function (req, res) {
+    res.send("\n  <body style='margin:0;padding:0'>\n      <div style='display: flex;justify-content: center;align-items: center; align-content: center;width:99vw;height:99vh'>\n        <h1 style='font-size:60px;font-weigth:600'>\uD83D\uDE80 API - Transa\u00E7\u00F5es</h1>\n      </div>\n  </body>\n  ");
+});
 // POST para criar um usuario
 app.post("/users", function (request, response) {
     var _a = request.body, name = _a.name, cpf = _a.cpf, email = _a.email, age = _a.age;
@@ -263,4 +266,4 @@ app.delete("/users/:userId/transactions/:id", function (request, response) {
     var user1 = user.transactions.splice(index, 1);
     return response.status(200).json(user1);
 });
-app.listen(8080, function () { return console.log("Servidor iniciado"); });
+app.listen(process.env.POT || 8080);

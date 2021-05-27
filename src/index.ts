@@ -1,5 +1,4 @@
 import express, {json, Request, Response} from 'express';
-import { stringify } from 'querystring';
 import { v4 as uuidv4 } from 'uuid';
 import cors from 'cors';
 
@@ -43,6 +42,16 @@ class Transaction {
       this.type = type;
     }
 }
+
+app.get("/", (req: express.Request, res: express.Response) => {
+  res.send(`
+  <body style='margin:0;padding:0'>
+      <div style='display: flex;justify-content: center;align-items: center; align-content: center;width:99vw;height:99vh'>
+        <h1 style='font-size:60px;font-weigth:600'>🚀 API - Transações</h1>
+      </div>
+  </body>
+  `);
+});
 
 // POST para criar um usuario
 app.post("/users", (request: Request, response: Response) => {
@@ -344,4 +353,4 @@ app.delete("/users/:userId/transactions/:id", (request: Request, response: Respo
 
 
 
-app.listen(8080, () => console.log("Servidor iniciado"));
+app.listen(process.env.POT ||8080);

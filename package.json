@@ -12,8 +12,7 @@
     "cors": "^2.8.5",
     "cpf": "^2.0.1",
     "express": "^4.17.1",
-    "has-cors": "^1.1.0",
-    "uuid": "^8.3.2"
+    "has-cors": "^1.1.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.10",
