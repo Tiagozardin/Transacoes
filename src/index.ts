@@ -1,47 +1,24 @@
 import express, {json, Request, Response} from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import cors from 'cors';
+import UserInterface from './interfaces/userInterface';
+import User from './classes/user';
+import validarNome from './middlewares/md-user-name';
+import validarCpf from './middlewares/md-user-cpf';
+import users from "./data"
+import validarExiste from './middlewares/md-user-exist';
+import validarEmail from './middlewares/md-user-email';
+import Transaction from './classes/transactions';
+import validarAge from './middlewares/md-user-age';
+import transactionInterface from './interfaces/transactionInterface';
+import validarTitle from './middlewares/md-transaction-title';
+import validarValue from './middlewares/md-transaction-value';
+import validarType from './middlewares/md-transaction-type';
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors())
-app.get('/', (request: Request, response: Response) => {
-return response.send('OK');
-});
-
-const users :any[] = [];
-
-class User {
-    public id: string;
-    public name: string;
-    public cpf: string;
-    public email: string;
-    public age: number;
-    public transactions: any = [];
-
-    constructor(name: string, cpf: string, email: string, age: number ) {
-      this.id = uuidv4();
-      this.name= name;
-      this.cpf = cpf;
-      this.email = email;
-      this.age = age; 
-    }
-}
-
-class Transaction {
-    public id: string;
-    public title: string;
-    public value: number;
-    public type: string;
-
-    constructor(title: string, value: number, type: string){
-      this.id = uuidv4();
-      this.title = title;
-      this.value = value;
-      this.type = type;
-    }
-}
 
 app.get("/", (req: express.Request, res: express.Response) => {
   res.send(`
@@ -53,44 +30,19 @@ app.get("/", (req: express.Request, res: express.Response) => {
   `);
 });
 
+
 // POST para criar um usuario
-app.post("/users", (request: Request, response: Response) => {
-  const { name, cpf, email, age } = request.body;
+app.post("/users", validarNome, validarCpf, validarExiste, validarEmail, validarAge, (request: Request, response: Response) => {
+  const { name, cpf, email, age }: UserInterface = request.body;
 
   const user = new User (name, cpf, email, age,);
-
-  const problems = [];
-
-  // Validar se veio o nome no Corpo
-  if (!name.trim()) {
-    problems.push("Nome deve ser preenchido");
-  }
-
-  // Validar se veio o nome maioe de 3 caracteres
-  if (name.trim().length <3){
-    problems.push("Nome deve conter ao menos 3 caracteres")
-  }
-
-  // Validar se veio o CPF no Corpo
-  if (!cpf) {
-    problems.push("CPF deve ser preenchido");
-  }
-
-   // Validar se CPF existente
-  const exist = users.find((f) => {
-    return f.cpf === cpf;
-  });
-
-  if (exist) {
-    problems.push(`CPF ${cpf} já cadastrado`);
-  }
-
-  if (problems.length > 0) {
-    return response.status(400).json({ msg: problems });
-  }
+ 
   users.push(user);
 
-  return response.status(200).json(user);
+  return response.status(201).json({
+    success: true,
+    data: user,
+  });
 });
 
 // GET para retornar um usuario por id
@@ -107,20 +59,24 @@ app.get("/users/:id", (request: Request, response: Response) => {
       });
   }
  
-  return response.status(200).json(ids);
+  return response.status(200).json({
+    success: true,
+    data: ids});
 });
 
 // GET para retornar lista de usuarios
 app.get("/users", (request: Request, response: Response) => {
 
   //buscar e devolver os growdevers cadastrados
-  return response.status(200).json(users);
+  return response.status(200).json({
+    success: true,
+    data: users});
 });
 
 // Atualizar um usuario por id
-app.put("/users/:id", (request: Request, response: Response) => {
+app.put("/users/:id", validarNome, validarCpf, validarEmail, validarAge, (request: Request, response: Response) => {
   const { id }: { id?: string } = request.params;
-  const { name, cpf, email, age } = request.body;
+  const { name, cpf, email, age } : UserInterface = request.body;
 
   // encontrar o registro que queremos alterar
   const user = users.find((f) => {
@@ -138,7 +94,9 @@ app.put("/users/:id", (request: Request, response: Response) => {
   user.email = email;
   user.age = age;
 
-  return response.status(200).json(user);
+  return response.status(200).json({
+    success: true,
+    data: user,});
 });
 
 // Excluir um usuario a partir de um ID
@@ -163,9 +121,9 @@ app.delete("/users/:id", (request: Request, response: Response) => {
 
 
 // POST para criar uma transação
-app.post("/user/:userId/transactions", (request: Request, response: Response) => {
+app.post("/user/:userId/transactions", validarTitle, validarValue, validarType, (request: Request, response: Response) => {
   const { userId }: { userId?: string } = request.params;
-  const { title, value, type } = request.body;
+  const { title, value, type }: transactionInterface = request.body;
 
   const transaction = new Transaction (title, value, type);
 
@@ -180,32 +138,6 @@ app.post("/user/:userId/transactions", (request: Request, response: Response) =>
     });
   }
 
-  const problems = [];
-
-  // Validar se veio o título no Corpo
-  if (!title.trim()) {
-    problems.push("título deve ser preenchido");
-  }
-
-  // Validar se veio o título maior de 3 caracteres
-  if (title.trim().length <3){
-    problems.push("título deve conter ao menos 3 caracteres")
-  }
-
-  // Validar se veio o título no Corpo
-  if (!value) {
-    problems.push("valor deve ser preenchido");
-  }
-
-  if (type !== "income") {
-    if (type !== "outcome") {
-          problems.push("Pode apenas dois tipos Income and Outcome")
-    }
-  }
-
-  if (problems.length > 0) {
-    return response.status(400).json({ msg: problems });
-  }
   user.transactions.push(transaction);
 
   return response.status(200).json(transaction);
