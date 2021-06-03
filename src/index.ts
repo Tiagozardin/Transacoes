@@ -115,7 +115,8 @@ app.delete("/users/:id", (request: Request, response: Response) => {
 
   const user = users.splice(index, 1);
 
-  return response.status(200).json(user);
+  return response.status(200).json({
+    success: true});
 });
 
 
